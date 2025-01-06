@@ -1,20 +1,20 @@
 ## Docker Instructions
 
-If you have [Docker](https://www.docker.com/) installed, you can run this
-in your terminal, when the Dockerfile is inside the `.devcontainer` directory:
+If you have Docker installed, you can run the following commands to set up and use the Docker container. This guide has been updated to ensure clarity and fix any inconsistencies.
+
+---
+
+## Build the Docker Image
+1. Navigate to the directory containing the `Dockerfile` (located in `.devcontainer`).
+2. Run the following command to build the image:
 
 ```bash
 docker build -f ./.devcontainer/Dockerfile --tag=my_project:latest .
-docker run -it my_project:latest
+docker build --tag=my_project:latest --build-arg GCC_VER=10 --build-arg LLVM_VER=11 .
+docker build --tag=my_project:latest --build-arg USE_CLANG=1 .
+
 ```
 
-This command will put you in a `bash` session in a Ubuntu 20.04 Docker container,
-with all of the tools listed in the [Dependencies](#dependencies) section already installed.
-Additionally, you will have `g++-11` and `clang++-13` installed as the default
-versions of `g++` and `clang++`.
-
-If you want to build this container using some other versions of gcc and clang,
-you may do so with the `GCC_VER` and `LLVM_VER` arguments:
 
 ```bash
 docker build --tag=myproject:latest --build-arg GCC_VER=10 --build-arg LLVM_VER=11 .
@@ -26,6 +26,7 @@ may do so like this:
 
 ```bash
 docker build --tag=my_project:latest --build-arg USE_CLANG=1 .
+
 ```
 
 You will be logged in as root, so you will see the `#` symbol as your prompt.
@@ -59,8 +60,43 @@ with these commands:
 /starter_project# cmake --build ./build
 ```
 
-The `ccmake` tool is also installed; you can substitute `ccmake` for `cmake` to
-configure the project interactively.
+For an interactive configuration, you can use ccmake instead of cmake:
+
+````bash
+ccmake -S . -B ./build
+
+````
+Troubleshooting
+Common Issues
+-fno-fat-lto-objects error:
+
+This error occurs due to an unsupported optimization flag. To resolve this, ensure the compiler version matches the one specified in the Dockerfile. You can also explicitly set CXXFLAGS or modify the build scripts to exclude unsupported flags.
+Warnings treated as errors:
+
+If warnings are treated as errors during the build, disable the -Werror flag in the CMakeLists.txt or build script.
+File Syncing Issues:
+
+Ensure the paths for volume mounting (-v) are correct.
+Testing the Docker Setup
+Run the following command to validate the Docker environment:
+
+````bash
+
+docker build -f ./.devcontainer/Dockerfile --tag=my_project:latest . && docker run -it my_project:latest
+Example: Build GUI Projects
+A script called build_examples.sh is included to build example GUI projects in this container:
+````
+
+
+Example: Build GUI Projects
+A script called build_examples.sh is included to build example GUI projects in this container:
+
+````bash
+Copy code
+./build_examples.sh
+````
+
+
 All of the tools this project supports are installed in the Docker image;
 enabling them is as simple as flipping a switch using the `ccmake` interface.
 Be aware that some of the sanitizers conflict with each other, so be sure to
